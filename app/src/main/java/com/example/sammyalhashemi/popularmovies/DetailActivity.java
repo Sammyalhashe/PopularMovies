@@ -1,5 +1,6 @@
 package com.example.sammyalhashemi.popularmovies;
 
+import android.databinding.DataBindingUtil;
 import android.media.Image;
 import android.os.Bundle;
 import android.sax.TextElementListener;
@@ -14,6 +15,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import data.Movie;
+
+import com.example.sammyalhashemi.popularmovies.databinding.ActivityDetailBinding;
 import com.squareup.picasso.Picasso;
 
 public class DetailActivity extends AppCompatActivity {
@@ -28,6 +31,7 @@ public class DetailActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
+        ActivityDetailBinding binding =  DataBindingUtil.setContentView(this, R.layout.activity_detail);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -53,7 +57,8 @@ public class DetailActivity extends AppCompatActivity {
         Movie incoming_movie = getIntent().getParcelableExtra("movieParcel");
 
         Picasso.get().load(Movie.getBasePosterPath() + incoming_movie.get_RELATIVE_POSTER_PATH()).into(this.poster);
-        this.title.setText(incoming_movie.get_title());
+        binding.setMovie(incoming_movie);
+//        this.title.setText(incoming_movie.get_title());
         this.description.setText(incoming_movie.get_overview());
         this.releasedate.setText(incoming_movie.get_release_date());
         this.vote_average.setText(String.format("%s/%d",incoming_movie.get_vote_average(), 10));

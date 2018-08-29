@@ -1,4 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
+<layout>
+    <data>
+        <variable
+            name="movie"
+            type="data.Movie" />
+    </data>
 <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -22,6 +28,7 @@
 
     <TextView
         android:id="@+id/activity_detail_movie_title"
+        android:text="@{movie.get_title()}"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
@@ -115,3 +122,4 @@
         app:layout_constraintStart_toStartOf="@+id/runtime"
         app:layout_constraintTop_toBottomOf="@+id/runtime" />
 </android.support.constraint.ConstraintLayout>
+</layout>

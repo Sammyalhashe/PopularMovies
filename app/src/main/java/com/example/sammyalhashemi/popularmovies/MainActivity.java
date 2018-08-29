@@ -54,7 +54,8 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         setContentView(R.layout.activity_main);
 
         this.mMovieRecyclerView = findViewById(R.id.movie_grid_rv);
-        this.mMovieRecyclerView.setLayoutManager(new GridLayoutManager(this, getResources().getInteger(R.integer.rv_span_count)));
+        // see movie grid adapter for function that calculates the span of the GridLayout
+        this.mMovieRecyclerView.setLayoutManager(new GridLayoutManager(this, MovieGridAdapter.calculateNoOfColumns(this)));
 //         this.adapter = new MovieGridAdapter(this, this, new ArrayList<Movie>() );
         this.mProgressBar = findViewById(R.id.pb_loading_indicator);
         // sort order vars
