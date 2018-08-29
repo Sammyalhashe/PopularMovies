@@ -1,8 +1,12 @@
 package com.example.sammyalhashemi.popularmovies.utilities;
 import android.content.Context;
+import android.content.res.Resources;
 import android.net.Uri;
 import android.util.Log;
 
+
+import com.example.sammyalhashemi.popularmovies.BuildConfig;
+import com.example.sammyalhashemi.popularmovies.R;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -11,6 +15,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Scanner;
 
+import data.MainContract;
 
 
 public final class NetworkUtils {
@@ -18,7 +23,7 @@ public final class NetworkUtils {
 
 
     private static final String QUERY_VAL = "api_key";
-    private static final String API_KEY = "e0428046a41d3951f60ddce086174a88";
+    private static final String API_KEY = BuildConfig.MOVIE_API_KEY;
     private static final String NETWORK_TAG = "NETWORK_UTILS";
 
     /**
@@ -49,16 +54,35 @@ public final class NetworkUtils {
         }
     }
 
-    public static URL buildURL(String baseURL) {
+    public static URL buildURL(String movieOrder) {
 
         // Initialize url
         URL url = null;
+        Uri uri = null;
 
         // using the base uri, build a uri by simpling adding the query params
-        Uri uri = Uri.parse(baseURL)
-                .buildUpon()
-                .appendQueryParameter(QUERY_VAL, API_KEY)
-                .build();
+        switch (movieOrder) {
+            case ("popular"): {
+                uri = Uri.parse(MainContract.BASE_URL_POPULAR)
+                        .buildUpon()
+                        .appendQueryParameter(QUERY_VAL, API_KEY)
+                        .appendQueryParameter("language", "en-US")
+                        .build();
+                break;
+            }
+            case ("top_rated"): {
+                uri = Uri.parse(MainContract.BASE_URL_TOP_RATED)
+                        .buildUpon()
+                        .appendQueryParameter(QUERY_VAL, API_KEY)
+                        .appendQueryParameter("language", "en-US")
+                        .build();
+                break;
+            }
+            default:
+                Log.d(NETWORK_TAG, Resources.getSystem().getString(R.string.sort_order_not_valid));
+                return null;
+        }
+
 
         // convert the uri to a url with some exception handling
         try {
@@ -68,6 +92,7 @@ public final class NetworkUtils {
             e.printStackTrace();
             return null;
         }
+
         return url;
     }
 

@@ -1,15 +1,31 @@
-package com.example.sammyalhashemi.popularmovies;
+package com.example.sammyalhashemi.popularmovies.utilities.RecyclerViewGrid;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.Toast;
+
+import com.example.sammyalhashemi.popularmovies.R;
+import com.squareup.picasso.Picasso;
+
+import java.util.List;
+
+import data.Movie;
 
 public class MovieGridAdapter extends RecyclerView.Adapter<MovieGridAdapter.MovieGridAdapterViewHolder> {
+
+    // Tag for Debug
+    private final String TAG = "MovieGridAdapter";
+
+    // where all the movies are stored
+    private List<Movie> Movies;
 
     // we use this context to gain access to utils, app resources and layout inflaters
     private final Context mContext;
@@ -17,13 +33,24 @@ public class MovieGridAdapter extends RecyclerView.Adapter<MovieGridAdapter.Movi
     // our click handler instance var and the interface it is of type
     private final MovieGridAdapterOnClickHandler mOnClickHandler;
 
+
+    // click listener to transfer over to detail_activity
     public interface MovieGridAdapterOnClickHandler {
-        void onClick(String title);
+        void onMoviePosterClick(Movie movie);
     }
 
-    MovieGridAdapter(Context context, MovieGridAdapterOnClickHandler onClickHandler) {
+    public MovieGridAdapter(Context context, MovieGridAdapterOnClickHandler onClickHandler, @Nullable List<Movie> movieList) {
         this.mContext = context;
         this.mOnClickHandler = onClickHandler;
+        this.Movies = movieList;
+    }
+
+
+    /* Change the adapter values */
+
+    public void ChangeAdapterValue(List<Movie> newMovies) {
+        this.Movies.clear();
+        this.Movies = newMovies;
     }
 
 
@@ -50,7 +77,9 @@ public class MovieGridAdapter extends RecyclerView.Adapter<MovieGridAdapter.Movi
     @NonNull
     @Override
     public MovieGridAdapterViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        return null;
+        View view = LayoutInflater.from(parent.getContext())
+                .inflate(R.layout.movie_grid_list_item, parent, false);
+        return new MovieGridAdapterViewHolder(view);
     }
 
     /**
@@ -75,7 +104,14 @@ public class MovieGridAdapter extends RecyclerView.Adapter<MovieGridAdapter.Movi
      */
     @Override
     public void onBindViewHolder(@NonNull MovieGridAdapterViewHolder holder, int position) {
+        final Movie movie = this.Movies.get(position);
 
+
+        /* use picasso to dynamically load the images. This code sample was grabbed directly from their site.
+           As they say, it can be done in one line!
+         */
+        Log.i(TAG, Movie.getBasePosterPath() + movie.get_RELATIVE_POSTER_PATH());
+        Picasso.get().load(Movie.getBasePosterPath() + movie.get_RELATIVE_POSTER_PATH()).into(holder.ivMoviePoster);
     }
 
     /**
@@ -85,18 +121,19 @@ public class MovieGridAdapter extends RecyclerView.Adapter<MovieGridAdapter.Movi
      */
     @Override
     public int getItemCount() {
-        return 0;
+        return this.Movies.size();
     }
 
 
     class MovieGridAdapterViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
+        // ImageView storing the poster for the image in the viewholder
         final ImageView ivMoviePoster;
 
         MovieGridAdapterViewHolder(View view) {
             super(view);
             view.setOnClickListener(this);
-            this.ivMoviePoster = (ImageView) view.findViewById(R.id.iv_movie_grid_item);
+            this.ivMoviePoster = (ImageView) (ImageView) view.findViewById(R.id.iv_movie_grid_item);
         }
 
 
@@ -107,7 +144,9 @@ public class MovieGridAdapter extends RecyclerView.Adapter<MovieGridAdapter.Movi
          */
         @Override
         public void onClick(View v) {
-
+            int position = getAdapterPosition();
+            Movie clickedMovie = Movies.get(position);
+            mOnClickHandler.onMoviePosterClick(clickedMovie);
         }
     }
 }

@@ -1,3 +1,47 @@
 <resources>
     <string name="app_name">PopularMovies</string>
+    <string name="sort_order_not_valid">Sort order given not valid</string>
+
+
+    <!-- RV Strings -->
+    <string name="pictureSize">w185</string>
+
+
+    <!-- strings for sort order for http request of movies -->
+    <string name="sort_order_popular">popular</string>
+    <string name="sort_order_top_rated">top_rated</string>
+    <string name="sort_order_key">SORT_TYPE</string>
+
+
+    <!--Strings for JSON handling-->
+    <string name="json_movie_results_array">results</string>
+    <string name="json_movie_object_original_title">original_title</string>
+    <string name="json_movie_object_poster_path">poster_path</string>
+    <string name="json_movie_object_backdrop_path">backdrop_path</string>
+    <string name="json_movie_object_overview">overview</string>
+    <string name="json_movie_object_release_date">release_date</string>
+    <string name="json_movie_object_vote_average">vote_average</string>
+    <string name="json_movie_object_title">title</string>
+    <string name="json_movie_object_original_language">original_language</string>
+    <string name="json_movie_object_vote_count">vote_count</string>
+    <string name="json_movie_object_id">id</string>
+    <string name="json_movie_object_popularity">popularity</string>
+    <string name="json_movie_object_video">video</string>
+    <string name="json_movie_object_adult">adult</string>
+    <string name="title_activity_detail">DetailActivity</string>
+
+    <!-- menu string resources -->
+    <string name="menu_popular">Sort by most popular</string>
+    <string name="menu_top">Sort by top</string>
+
+
+    <!-- contentDescriptions -->
+    <string name="CD_main_movieposter">Movie poster of movie</string>
+
+    <!-- contentDetail Strings -->
+    <string name="plot_syn_title">Plot Synopsis</string>
+    <string name="releaseDate">Release Date:</string>
+    <string name="runtime">runtime</string>
+    <string name="vote_average">Vote Average</string>
+    <string name="movie_title">Movie Title</string>
 </resources>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <integer name="rv_span_count">2</integer>
+
+    <!-- in DetailActivity Java -->
+    <integer name="score_out_of">10</integer>
+</resources>
