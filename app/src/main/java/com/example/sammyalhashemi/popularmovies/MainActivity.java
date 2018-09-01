@@ -12,13 +12,16 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.CursorAdapter;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
+import com.example.sammyalhashemi.popularmovies.utilities.MovieClientRetrofit;
 import com.example.sammyalhashemi.popularmovies.utilities.NetworkUtils;
 import com.example.sammyalhashemi.popularmovies.utilities.RecyclerViewGrid.MovieGridAdapter;
 
@@ -29,11 +32,21 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.MissingFormatArgumentException;
 
+import data.MainContract;
 import data.Movie;
+import data.MovieRepo;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<String>, MovieGridAdapter.MovieGridAdapterOnClickHandler {
 
+    // TAG
+    private final String TAG = "MAINACTIVITY";
     // holds the main activity layout elements
     private RecyclerView mMovieRecyclerView;
     private MovieGridAdapter adapter;
@@ -76,12 +89,53 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
         sortArguments.putString(getString(R.string.sort_order_key), POPULAR_SORT);
 
+        getMoviesFromAPI(POPULAR_SORT);
 
-        LoaderManager loaderManager = getSupportLoaderManager();
+//        LoaderManager loaderManager = getSupportLoaderManager();
 
 
-        loaderManager.initLoader(MOVIE_LOADER_ID,sortArguments, this);
+//        loaderManager.initLoader(MOVIE_LOADER_ID,sortArguments, this);
     }
+
+    private void getMoviesFromAPI(String sort) {
+        Retrofit.Builder builder = new Retrofit.Builder()
+                .baseUrl(MainContract.BASE_URL)
+                .addConverterFactory(GsonConverterFactory.create());
+
+        Retrofit retrofit = builder.build();
+
+        MovieClientRetrofit movieClientRetrofit = retrofit.create(MovieClientRetrofit.class);
+        Call<MovieRepo> call = movieClientRetrofit.getMoviesOfSort(sort, BuildConfig.MOVIE_API_KEY, "en-US");
+        this.mProgressBar.setVisibility(View.VISIBLE);
+
+
+        call.enqueue(new Callback<MovieRepo>() {
+            @Override
+            public void onResponse(Call<MovieRepo> call, Response<MovieRepo> response) {
+                MovieRepo repo = response.body();
+                Log.d(TAG, repo.getResults().toString());
+                Log.d(TAG, repo.getTotal_pages());
+                List<Movie> movies = repo.getResults();
+                MoviesList.clear();
+                for (Movie movie: movies) {
+                    MoviesList.add(movie);
+                    Log.d(TAG,movie.get_overview());
+                }
+                MainActivity _this = MainActivity.this;
+                _this.adapter = new MovieGridAdapter(_this, _this, MoviesList);
+                _this.adapter.notifyDataSetChanged();
+                _this.mMovieRecyclerView.setAdapter(_this.adapter);
+                _this.mProgressBar.setVisibility(View.INVISIBLE);
+            }
+
+            @Override
+            public void onFailure(Call<MovieRepo> call, Throwable t) {
+                t.printStackTrace();
+                Toast.makeText(MainActivity.this, "error in Retrofit :(", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
 
     /**
      * Instantiate and return a new Loader for the given ID.
@@ -98,7 +152,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
             @Override
             protected void onStartLoading() {
                 // maybe have
-                mProgressBar.setVisibility(View.VISIBLE);
+//                mProgressBar.setVisibility(View.VISIBLE);
                 forceLoad();
             }
 
@@ -199,10 +253,10 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
                     //this.adapter.ChangeAdapterValue(MoviesList);
 
-                    this.adapter = new MovieGridAdapter(this, this, MoviesList );
-                    this.adapter.notifyDataSetChanged();
-                    this.mMovieRecyclerView.setAdapter(this.adapter);
-                    this.mProgressBar.setVisibility(View.INVISIBLE);
+//                    this.adapter = new MovieGridAdapter(this, this, MoviesList );
+//                    this.adapter.notifyDataSetChanged();
+//                    this.mMovieRecyclerView.setAdapter(this.adapter);
+//                    this.mProgressBar.setVisibility(View.INVISIBLE);
                 }
             }
         } catch (JSONException e) {
@@ -242,12 +296,14 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         Bundle sortBundle = new Bundle();
         switch (item.getItemId()) {
             case R.id.menu_popular:
-                sortBundle.putString(getString(R.string.sort_order_key), POPULAR_SORT);
-                loaderManager.restartLoader(MOVIE_LOADER_ID, sortBundle, this);
+//                sortBundle.putString(getString(R.string.sort_order_key), POPULAR_SORT);
+//                loaderManager.restartLoader(MOVIE_LOADER_ID, sortBundle, this);
+                getMoviesFromAPI(POPULAR_SORT);
                 return true;
             case R.id.menu_top:
-                sortBundle.putString(getString(R.string.sort_order_key), TOP_RATED_SORT);
-                loaderManager.restartLoader(MOVIE_LOADER_ID, sortBundle, this);
+//                sortBundle.putString(getString(R.string.sort_order_key), TOP_RATED_SORT);
+//                loaderManager.restartLoader(MOVIE_LOADER_ID, sortBundle, this);
+                getMoviesFromAPI(TOP_RATED_SORT);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);

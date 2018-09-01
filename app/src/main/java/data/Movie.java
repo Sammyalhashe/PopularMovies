@@ -3,17 +3,38 @@ package data;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.google.gson.annotations.SerializedName;
+
 public class Movie implements Parcelable {
     private static final String _BASE_POSTER_PATH = "http://image.tmdb.org/t/p/w500";
+    @SerializedName("poster_path")
     private final String _RELATIVE_POSTER_PATH;
+    @SerializedName("backdrop_path")
     private final String _RELATIVE_BACKDROP_PATH;
-    private final String _title, _original_title;
-    private final String _original_language, _overview, _release_date;
+    @SerializedName("title")
+    private final String _title;
+    @SerializedName("original_title")
+    private final String _original_title;
+    @SerializedName("original_language")
+    private final String _original_language;
+    @SerializedName("overview")
+    private final String _overview;
+    @SerializedName("release_date")
+    private final String _release_date;
 
-    private final int _vote_count, _id;
-    private final double _vote_average, _popularity;
+    @SerializedName("vote_count")
+    private final int _vote_count;
+    @SerializedName("id")
+    private final int _id;
+    @SerializedName("vote_average")
+    private final double _vote_average;
+    @SerializedName("popularity")
+    private final double _popularity;
 
-    private final boolean _video, _adult;
+    @SerializedName("video")
+    private final boolean _video;
+    @SerializedName("adult")
+    private final boolean _adult;
 
 
     public Movie(

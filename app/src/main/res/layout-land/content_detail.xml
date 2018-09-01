@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout>
+<layout xmlns:app="http://schemas.android.com/apk/res-auto">
         <data>
             <variable
             name="movie"
             type="data.Movie" />
         </data>
 <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -27,23 +26,25 @@
 
     <TextView
         android:id="@+id/activity_detail_movie_title"
-        android:text="@{movie.get_title()}"
-        tools:text="@string/movie_title"
-        android:textSize="@dimen/title_font_sizes"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="28dp"
         android:layout_marginBottom="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginLeft="16dp"
         android:layout_marginRight="8dp"
         android:layout_marginStart="16dp"
         android:layout_marginTop="68dp"
+        android:gravity="end"
+        android:text="@{movie.get_title()}"
+        android:textAlignment="textEnd"
+        android:textSize="@dimen/title_font_sizes"
         app:layout_constraintBottom_toTopOf="@+id/runtime"
         app:layout_constraintEnd_toEndOf="@+id/activity_detail_image_id"
-        app:layout_constraintHorizontal_bias="0.529"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.0" />
+        app:layout_constraintVertical_bias="0.0"
+        tools:text="@string/movie_title" />
 
     <TextView
         android:id="@+id/activity_detail_movie_description"
