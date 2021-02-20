@@ -36,6 +36,7 @@
         android:layout_height="228dp"
         tools:layout_editor_absoluteX="45dp"
         tools:layout_editor_absoluteY="76dp" />
+
     <!--
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab"

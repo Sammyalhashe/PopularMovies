@@ -1,5 +1,6 @@
 package data;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class MovieRepo {
@@ -8,14 +9,14 @@ public class MovieRepo {
     }
 
     private String total_pages;
-    private List<Movie> results;
+    private ArrayList<Movie> results;
 
-    public MovieRepo(List<Movie> results, String total_pages) {
+    public MovieRepo(ArrayList<Movie> results, String total_pages) {
         this.results = results;
         this.total_pages = total_pages;
     }
 
-    public List<Movie> getResults() {
+    public ArrayList<Movie> getResults() {
         return results;
     }
 }

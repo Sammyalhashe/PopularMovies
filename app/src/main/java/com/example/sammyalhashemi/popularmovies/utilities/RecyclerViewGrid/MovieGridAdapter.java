@@ -121,7 +121,7 @@ public class MovieGridAdapter extends RecyclerView.Adapter<MovieGridAdapter.Movi
         /* use picasso to dynamically load the images. This code sample was grabbed directly from their site.
            As they say, it can be done in one line!
          */
-        Log.i(TAG, Movie.getBasePosterPath() + movie.get_RELATIVE_POSTER_PATH());
+//        Log.i(TAG, Movie.getBasePosterPath() + movie.get_RELATIVE_POSTER_PATH());
         Picasso.get().load(Movie.getBasePosterPath() + movie.get_RELATIVE_POSTER_PATH()).into(holder.ivMoviePoster);
     }
 

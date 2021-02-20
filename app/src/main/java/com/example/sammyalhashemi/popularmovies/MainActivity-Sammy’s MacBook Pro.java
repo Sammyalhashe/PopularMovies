@@ -2,6 +2,8 @@ package com.example.sammyalhashemi.popularmovies;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.os.Parcelable;
+import android.os.PersistableBundle;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.AsyncTaskLoader;
 import android.content.Context;
@@ -17,11 +19,16 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.AnimationUtils;
+import android.view.animation.LayoutAnimationController;
 import android.widget.CursorAdapter;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.example.sammyalhashemi.popularmovies.utilities.Listeners;
 import com.example.sammyalhashemi.popularmovies.utilities.MovieClientRetrofit;
+import com.example.sammyalhashemi.popularmovies.utilities.MovieNetworkUtil;
+import com.example.sammyalhashemi.popularmovies.utilities.Listeners.MovieResponseListener;
 import com.example.sammyalhashemi.popularmovies.utilities.NetworkUtils;
 import com.example.sammyalhashemi.popularmovies.utilities.RecyclerViewGrid.MovieGridAdapter;
 
@@ -32,7 +39,6 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.MissingFormatArgumentException;
 
 import data.MainContract;
 import data.Movie;
@@ -43,61 +49,136 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<String>, MovieGridAdapter.MovieGridAdapterOnClickHandler {
+public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<String>, MovieGridAdapter.MovieGridAdapterOnClickHandler, Listeners.MovieResponseListener {
 
     // TAG
     private final String TAG = "MAINACTIVITY";
+    private final String LIST_STATE_KEY = "LIST_STATE";
+    private final String MOVIES_STATE_KEY = "MOVIES_STATE_KEY";
+    private final String SORT_KEY = "SORT_KEY";
+
     // holds the main activity layout elements
+    // recyclerView variables
     private RecyclerView mMovieRecyclerView;
     private MovieGridAdapter adapter;
     private RecyclerView.LayoutManager mLayoutManager;
+    LayoutAnimationController controller;
+    Parcelable mRecyclerState;
+
+    // other variables
     private ProgressBar mProgressBar;
-    private List<Movie> MoviesList;
+    private ArrayList<Movie> MoviesList;
+    private MovieNetworkUtil movieUtil;
 
     // Loader ID
     private static final int MOVIE_LOADER_ID = 2000;
 
+    // other strings set in onCreate
     private String POPULAR_SORT;
     private String TOP_RATED_SORT;
+    private String sortOrder = null;
 
 
+    /*
+        Grabs all the necessary UI components to manipulate including the
+        RecyclerView and the ProgressBar.
+        Creates the animation controller for the grid layout
+        Initializes the ArrayList to store the movies
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // set the view to be displayed
         setContentView(R.layout.activity_main);
 
+        /*
+        RecyclerView Operations
+         */
+        // grab the recyclerView
         this.mMovieRecyclerView = findViewById(R.id.movie_grid_rv);
-        // see movie grid adapter for function that calculates the span of the GridLayout
+        // see movie grid layout manager for function that calculates the span of the GridLayout
         this.mMovieRecyclerView.setLayoutManager(new GridLayoutManager(this, MovieGridAdapter.calculateNoOfColumns(this)));
-//         this.adapter = new MovieGridAdapter(this, this, new ArrayList<Movie>() );
+        // this class method returns the animation controller for the grid layout of the RecyclerView
+        this.controller =  runAnimation(this.mMovieRecyclerView, 0);
+        // Use this controller as the animation
+        this.mMovieRecyclerView.setLayoutAnimation(this.controller);
+        // initially set the adapter to null -> adapter is set in this.updateUI()
+        this.adapter = null;
+        /* Setting fixed size for the RecyclerView improves performance because you
+         * you know changes in content will not change child layout sizes in RecyclerView
+         */
+        this.mMovieRecyclerView.setHasFixedSize(true);
+
+        // grab the progressBar
         this.mProgressBar = findViewById(R.id.pb_loading_indicator);
+
+
         // sort order vars
         POPULAR_SORT = getString(R.string.sort_order_popular);
         TOP_RATED_SORT = getString(R.string.sort_order_top_rated);
 
-        this.MoviesList = new ArrayList<>();
-
-
-        /* Setting fixed size for the RecyclerView improves performance because you
-         * you know changes in content will not change child layout sizes in RecyclerView
-         *
-         */
-        this.mMovieRecyclerView.setHasFixedSize(true);
-        // this.mMovieRecyclerView.setAdapter(adapter);
-
-        Bundle sortArguments = new Bundle();
-
-        sortArguments.putString(getString(R.string.sort_order_key), POPULAR_SORT);
-
-        getMoviesFromAPI(POPULAR_SORT);
-
-//        LoaderManager loaderManager = getSupportLoaderManager();
-
-
-//        loaderManager.initLoader(MOVIE_LOADER_ID,sortArguments, this);
+        if (savedInstanceState != null) {
+            this.sortOrder = savedInstanceState.getString(SORT_KEY);
+            // this.MoviesList = savedInstanceState.getParcelableArrayList(MOVIES_STATE_KEY);
     }
 
-    private void getMoviesFromAPI(String sort) {
+
+        this.MoviesList = new ArrayList<>();
+        this.movieUtil = MovieNetworkUtil.getInstance(getApplicationContext());
+        if (this.sortOrder == null) {
+            this.sortOrder = POPULAR_SORT;
+        }
+        this.movieUtil.getMoviesFromAPI(this.sortOrder, this);
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString(SORT_KEY, this.sortOrder);
+        outState.putParcelableArrayList(MOVIES_STATE_KEY, this.MoviesList);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+
+        if (savedInstanceState != null) {
+            this.sortOrder = savedInstanceState.getString(SORT_KEY);
+            // this.MoviesList = savedInstanceState.getParcelableArrayList(MOVIES_STATE_KEY);
+        }
+        super.onRestoreInstanceState(savedInstanceState);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        if (this.mRecyclerState != null) {
+            this.mLayoutManager.onRestoreInstanceState(this.mRecyclerState);
+        }
+
+        if (this.sortOrder != null) {
+            this.movieUtil.getMoviesFromAPI(this.sortOrder, this);
+        }
+
+//        if (this.MoviesList != null) {
+//            this.updateUI(this.MoviesList);
+//        }
+
+    }
+
+    private LayoutAnimationController runAnimation(RecyclerView mMovieRecyclerView, int i) {
+        Context context = mMovieRecyclerView.getContext();
+        LayoutAnimationController controller = null;
+
+        if (i == 0) {
+            controller = AnimationUtils.loadLayoutAnimation(context, R.anim.layout_popup);
+        }
+
+        return controller;
+    }
+
+    private void getMoviesFromAPI(String sort, final Listeners.MovieResponseListener listener) {
         Retrofit.Builder builder = new Retrofit.Builder()
                 .baseUrl(MainContract.BASE_URL)
                 .addConverterFactory(GsonConverterFactory.create());
@@ -121,11 +202,12 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
                     MoviesList.add(movie);
                     Log.d(TAG,movie.get_overview());
                 }
-                MainActivity _this = MainActivity.this;
-                _this.adapter = new MovieGridAdapter(_this, _this, MoviesList);
-                _this.adapter.notifyDataSetChanged();
-                _this.mMovieRecyclerView.setAdapter(_this.adapter);
-                _this.mProgressBar.setVisibility(View.INVISIBLE);
+                listener.updateUI(MoviesList);
+//                MainActivity _this = MainActivity.this;
+//                _this.adapter = new MovieGridAdapter(_this, _this, MoviesList);
+//                _this.adapter.notifyDataSetChanged();
+//                _this.mMovieRecyclerView.setAdapter(_this.adapter);
+//                _this.mProgressBar.setVisibility(View.INVISIBLE);
             }
 
             @Override
@@ -298,17 +380,39 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
             case R.id.menu_popular:
 //                sortBundle.putString(getString(R.string.sort_order_key), POPULAR_SORT);
 //                loaderManager.restartLoader(MOVIE_LOADER_ID, sortBundle, this);
-                getMoviesFromAPI(POPULAR_SORT);
+//                getMoviesFromAPI(POPULAR_SORT, this);
+//                MovieNetworkUtil.getMoviesFromAPI(POPULAR_SORT, this);
+                this.sortOrder = POPULAR_SORT;
+                this.movieUtil.getMoviesFromAPI(this.sortOrder, this);
                 return true;
             case R.id.menu_top:
 //                sortBundle.putString(getString(R.string.sort_order_key), TOP_RATED_SORT);
 //                loaderManager.restartLoader(MOVIE_LOADER_ID, sortBundle, this);
-                getMoviesFromAPI(TOP_RATED_SORT);
+//                getMoviesFromAPI(TOP_RATED_SORT, this);
+//                MovieNetworkUtil.getMoviesFromAPI(TOP_RATED_SORT, this);
+                this.sortOrder = TOP_RATED_SORT;
+                this.movieUtil.getMoviesFromAPI(this.sortOrder, this);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
     }
 
-    /* Create menu method executions here */
+    @Override
+    public void updateUI(ArrayList<Movie> movies) {
+//        Log.d(TAG, movies.toString());
+        this.MoviesList.clear();
+        this.MoviesList = movies;
+        this.adapter = new MovieGridAdapter(this, this, MoviesList);
+        this.mMovieRecyclerView.setAdapter(this.adapter);
+        this.adapter.notifyDataSetChanged();
+        this.mMovieRecyclerView.scheduleLayoutAnimation();
+        this.mProgressBar.setVisibility(View.INVISIBLE);
+    }
+
+    @Override
+    public void toggleProgressBar() {
+        this.mProgressBar.setVisibility(this.mProgressBar.getVisibility() == View.VISIBLE ? View.INVISIBLE : View.VISIBLE);
+
+    }
 }

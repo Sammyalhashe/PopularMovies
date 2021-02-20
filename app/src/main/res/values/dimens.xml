@@ -1,5 +1,0 @@
-<resources>
-    <dimen name="fab_margin">16dp</dimen>
-    <dimen name="title_font_sizes">22sp</dimen>
-    <dimen name="non_title_font_sizes">16sp</dimen>
-</resources>

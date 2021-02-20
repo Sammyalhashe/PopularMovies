@@ -1,0 +1,14 @@
+<resources>
+    <dimen name="fab_margin">16dp</dimen>
+    <dimen name="title_font_sizes">22sp</dimen>
+    <dimen name="non_title_font_sizes">16sp</dimen>
+
+    <!-- animation values -->
+    <integer name="animation_dur_med">300</integer>
+    <fraction name="animation_scale_init">0.4</fraction>
+    <fraction name="animation_scale_final">1</fraction>
+
+    <integer name="alpha_init">0</integer>
+    <integer name="alpha_final">1</integer>
+    <fraction name="anim_delay">15%</fraction>
+</resources>

@@ -1,6 +1,9 @@
 <resources>
-    <string name="app_name">PopularMovies</string>
+    <string name="app_name">Popcorn</string>
     <string name="sort_order_not_valid">Sort order given not valid</string>
+    <string name="movie_poster_description">Movie poster for description</string>
+
+    <string name="language">en-US</string>
 
 
     <!-- RV Strings -->
